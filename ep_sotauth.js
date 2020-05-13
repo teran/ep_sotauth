@@ -9,25 +9,25 @@ var sotauthUsername = {};
 
 
 function sotauthSetUsername(token, username) {
-      console.debug('ep_sotauth.sotauthSetUsername: getting authorid for token %s', token);
-      authorManager.getAuthor4Token(token, function(err, author) {
-	if(ERR(err)) {
-	  console.debug('ep_sotauth.sotauthSetUsername: error getting author for token %s', token);
-	  return;
-	} else {
-	  if(author) {
-	    console.debug('ep_sotauth.sotauthSetUsername: have authorid %s, setting username to %s', author, username);
-	    authorManager.setAuthorName(author, username);
-	  } else {
-	    console.debug('ep_sotauth.sotauthSetUsername: could not get authorid for token %s', token);
-	  }
-	}
-      });
+  console.debug('ep_sotauth.sotauthSetUsername: getting authorid for token %s', token);
+  authorManager.getAuthor4Token(token, function (err, author) {
+    if (ERR(err)) {
+      console.debug('ep_sotauth.sotauthSetUsername: error getting author for token %s', token);
       return;
+    } else {
+      if (author) {
+        console.debug('ep_sotauth.sotauthSetUsername: have authorid %s, setting username to %s', author, username);
+        authorManager.setAuthorName(author, username);
+      } else {
+        console.debug('ep_sotauth.sotauthSetUsername: could not get authorid for token %s', token);
+      }
+    }
+  });
+  return;
 }
 
 
-exports.authenticate = function(hook_name, context, cb) {
+exports.authenticate = function (hook_name, context, cb) {
   console.debug('ep_sotauth.authenticate');
   if (context.req.headers['x-forwarded-user']) {
     var username = context.req.headers['x-forwarded-user'];
@@ -47,10 +47,10 @@ exports.authenticate = function(hook_name, context, cb) {
 }
 
 
-exports.handleMessage = function(hook_name, context, cb) {
+exports.handleMessage = function (hook_name, context, cb) {
   console.debug("ep_sotauth.handleMessage");
-  if( context.message.type == "CLIENT_READY" ) {
-    if(!context.message.token) {
+  if (context.message.type == "CLIENT_READY") {
+    if (!context.message.token) {
       console.debug('ep_sotauth.handleMessage: intercepted CLIENT_READY message has no token!');
     } else {
       var client_id = context.client.id;
@@ -58,7 +58,7 @@ exports.handleMessage = function(hook_name, context, cb) {
       console.debug('ep_sotauth.handleMessage: intercepted CLIENT_READY message for client_id = %s express_sid = %s, setting username for token %s to %s', client_id, express_sid, context.message.token, sotauthUsername);
       sotauthSetUsername(context.message.token, sotauthUsername[express_sid]);
     }
-  } else if( context.message.type == "COLLABROOM" && context.message.data.type == "USERINFO_UPDATE" ) {
+  } else if (context.message.type == "COLLABROOM" && context.message.data.type == "USERINFO_UPDATE") {
     console.debug('ep_sotauth.handleMessage: intercepted USERINFO_UPDATE and dropping it!');
     return cb([null]);
   }
@@ -66,13 +66,13 @@ exports.handleMessage = function(hook_name, context, cb) {
 }
 
 
-exports.expressConfigure = function(hook_name, context, cb) {
+exports.expressConfigure = function (hook_name, context, cb) {
   console.debug('ep_sotauth.expressConfigure: setting trust proxy');
   context.app.enable('trust proxy');
 }
 
 
-exports.authorize = function(hook_name, context, cb) {
+exports.authorize = function (hook_name, context, cb) {
   console.debug('ep_sotauth.authorize');
   if (context.resource.match(/^\/(static|javascripts|pluginfw|favicon.ico|api)/)) {
     console.debug('ep_sotauth.authorize: authorizing static path %s', context.resource);
@@ -80,11 +80,9 @@ exports.authorize = function(hook_name, context, cb) {
   } else {
     console.debug('ep_sotauth.authorize: passing authorize along for path %s', context.resource);
     if (context.req.session.user !== undefined) {
-        return cb([true]);
+      return cb([true]);
     } else {
-        return cb([false]);
+      return cb([false]);
     }
   }
 }
-
-
